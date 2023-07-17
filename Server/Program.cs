@@ -16,7 +16,7 @@ namespace Server
       {
         var data = Console.ReadLine();
 
-        if (data.Equals("EXIT"))
+        if (data.ToUpper().Equals("QUIT"))
         {
           server.Stop();
           break;

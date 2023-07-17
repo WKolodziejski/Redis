@@ -32,24 +32,24 @@ namespace Server
       listener.Stop();
     }
 
-    protected void Write(string uuid, string data)
+    protected void Write(string id, string data)
     {
       lock (clients)
       {
-        var client = clients[uuid];
+        var client = clients[id];
         var stream = client.GetStream();
         var bytes = Encoding.ASCII.GetBytes(data ?? string.Empty);
         stream.Write(bytes, 0, bytes.Length);
       }
     }
 
-    protected void CloseConnection(string uuid)
+    protected void CloseConnection(string id)
     {
       lock (clients)
       {
-        var client = clients[uuid];
+        var client = clients[id];
         client.Close();
-        clients.Remove(uuid);
+        clients.Remove(id);
       }
     }
 
@@ -61,15 +61,15 @@ namespace Server
       {
         while (true)
         {
-          var uuid = Guid.NewGuid().ToString();
+          var id = Guid.NewGuid().ToString();
           var client = listener.AcceptTcpClient();
 
           lock (clients)
           {
-            clients.Add(uuid, client);
+            clients.Add(id, client);
           }
 
-          var clientThread = new Thread(() => ListenClient(uuid, client));
+          var clientThread = new Thread(() => ListenClient(id, client));
           clientThread.Start();
         }
       }
@@ -83,9 +83,9 @@ namespace Server
       OnStopListening();
     }
 
-    private void ListenClient(string uuid, TcpClient client)
+    private void ListenClient(string id, TcpClient client)
     {
-      OnClientConnected(uuid);
+      OnClientConnected(id);
 
       try
       {
@@ -97,7 +97,7 @@ namespace Server
           var read = stream.Read(buffer, 0, client.ReceiveBufferSize);
           var data = Encoding.ASCII.GetString(buffer, 0, read);
 
-          OnDataReceived(uuid, data);
+          OnDataReceived(id, data);
         }
       }
       catch (Exception e)
@@ -107,14 +107,14 @@ namespace Server
 
       client.Close();
 
-      OnClientDisconnected(uuid);
+      OnClientDisconnected(id);
     }
 
     protected abstract void OnStartListening();
     protected abstract void OnStopListening();
-    protected abstract void OnDataReceived(string uuid, string data);
-    protected abstract void OnClientConnected(string uuid);
-    protected abstract void OnClientDisconnected(string uuid);
+    protected abstract void OnDataReceived(string id, string data);
+    protected abstract void OnClientConnected(string id);
+    protected abstract void OnClientDisconnected(string id);
     protected abstract void OnError(Exception e);
   }
 }

@@ -20,12 +20,12 @@ namespace Client
 
     protected override void OnDataReceived(string data)
     {
-      Console.WriteLine($"Received: {data}");
+      Console.WriteLine($"{data}");
     }
 
     protected override void OnError(Exception e)
     {
-      // Console.Error.WriteLine(e);
+      Console.Error.WriteLine(e);
     }
   }
 }

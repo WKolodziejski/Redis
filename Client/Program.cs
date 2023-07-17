@@ -17,7 +17,7 @@ namespace Client
         var data = Console.ReadLine();
         client.Write(data);
 
-        if (data.Equals("EXIT"))
+        if (data.ToUpper().Equals("QUIT"))
         {
           client.Stop();
           break;
