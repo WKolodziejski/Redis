@@ -7,14 +7,17 @@ namespace Server
   public class DataHandler
   {
     public delegate void WriteCallback(string id, string data);
+    public delegate void DisconnectCallback(string id);
 
     private readonly Dictionary<string, Data> table;
     private readonly WriteCallback writeCallback;
+    private readonly DisconnectCallback disconnectCallback;
 
-    public DataHandler(Dictionary<string, Data> table, WriteCallback writeCallback)
+    public DataHandler(Dictionary<string, Data> table, WriteCallback writeCallback, DisconnectCallback disconnectCallback)
     {
       this.table = table;
       this.writeCallback = writeCallback;
+      this.disconnectCallback = disconnectCallback;
     }
 
     public void Handle(string id, Operation operation)
@@ -31,6 +34,10 @@ namespace Server
 
         case Del o:
           Del(id, o);
+          break;
+        
+        case Quit _:
+          Quit(id);
           break;
 
         case Error o:
@@ -55,7 +62,7 @@ namespace Server
         switch (exists)
         {
           case true when nx:
-            writeCallback(id, "+OK");
+            writeCallback(id, "Value not inserted");
             return;
           
           case false when xx:
@@ -93,29 +100,47 @@ namespace Server
 
         if (!exists)
         {
-          writeCallback(id, "null");
+          writeCallback(id, "-1");
           return;
         }
 
-        writeCallback(id, IsExpired(o.Key, data) ? "null" : data.Value);
+        if (IsExpired(o.Key, data))
+        {
+          writeCallback(id, "-1");
+        }
+        else
+        {
+          writeCallback(id, $"${data.Value.Length}");
+          writeCallback(id, data.Value);
+        }
       }
     }
-
-    // TODO: aceitar várias keys e retornar quantidade de removidas
+    
     private void Del(string id, Del o)
     {
       lock (table)
       {
-        if (!table.ContainsKey(o.Key))
+        var count = 0;
+        
+        foreach (var key in o.Keys)
         {
-          writeCallback(id, ":0");
-          return;
+          if (!table.ContainsKey(key))
+          {
+            continue;
+          }
+
+          table.Remove(key);
+          count++;
         }
-
-        table.Remove(o.Key);
-
-        writeCallback(id, ":1");
+        
+        writeCallback(id, $":{count}");
       }
+    }
+    
+    private void Quit(string id)
+    {
+      writeCallback(id, "+OK");
+      disconnectCallback(id);
     }
 
     private bool IsExpired(string key, Data data)

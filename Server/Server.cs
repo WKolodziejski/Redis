@@ -25,10 +25,8 @@ namespace Server
     
     protected override void OnDataReceived(string id, string data)
     {
-      Console.WriteLine($"{id}: {data.Trim()}");
-      
       var parser = parsers[id];
-      parser.Parse(data.Trim());
+      parser.Parse(data);
     }
 
     protected override void OnStartListening()
@@ -45,8 +43,6 @@ namespace Server
     {
       Console.WriteLine($"{id}: Connected");
 
-      Write(id, "Welcome");
-
       lock (parsers)
       {
         parsers.Add(id, new DataParser(id, OnDataParsed));
@@ -54,7 +50,7 @@ namespace Server
 
       lock (handlers)
       {
-        handlers.Add(id, new DataHandler(table, Write));
+        handlers.Add(id, new DataHandler(table, Write, Disconnect));
       }
     }
 

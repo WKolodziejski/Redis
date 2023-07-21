@@ -12,16 +12,13 @@ namespace Client
       var client = new Client(ServerIp, Port);
       client.Start();
 
-      while (true)
+      while (client.Running)
       {
         var data = Console.ReadLine();
         client.Write(data);
-
-        if (data.ToUpper().Equals("QUIT"))
-        {
-          client.Stop();
+        
+        if (data.ToUpper() == "QUIT") 
           break;
-        }
       }
     }
   }

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Server
 {
   public abstract class AsyncServer
   {
+    private static readonly Regex SpacesRegex = new Regex(@"\s+");
+    
     private readonly TcpListener listener;
     private readonly Thread connectionsThread;
     private readonly Dictionary<string, TcpClient> clients;
@@ -43,13 +46,14 @@ namespace Server
       }
     }
 
-    protected void CloseConnection(string id)
+    protected void Disconnect(string id)
     {
       lock (clients)
       {
         var client = clients[id];
         client.Close();
         clients.Remove(id);
+        OnClientDisconnected(id);
       }
     }
 
@@ -89,7 +93,7 @@ namespace Server
 
       try
       {
-        while (true)
+        while (client.Connected)
         {
           var stream = client.GetStream();
           var buffer = new byte[client.ReceiveBufferSize];
@@ -97,6 +101,8 @@ namespace Server
           var read = stream.Read(buffer, 0, client.ReceiveBufferSize);
           var data = Encoding.ASCII.GetString(buffer, 0, read);
 
+          SpacesRegex.Replace(data, data);
+          
           OnDataReceived(id, data);
         }
       }
@@ -106,8 +112,6 @@ namespace Server
       }
 
       client.Close();
-
-      OnClientDisconnected(id);
     }
 
     protected abstract void OnStartListening();

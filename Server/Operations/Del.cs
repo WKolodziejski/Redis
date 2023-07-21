@@ -2,11 +2,11 @@
 {
   public class Del : Operation
   {
-    public readonly string Key;
+    public readonly string[] Keys;
 
-    public Del(string key)
+    public Del(string[] keys)
     {
-      Key = key;
+      Keys = keys;
     }
   }
 }

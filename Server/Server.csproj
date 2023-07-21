@@ -46,6 +46,7 @@
         <Compile Include="Operations\Error.cs" />
         <Compile Include="Operations\Get.cs" />
         <Compile Include="Operations\Operation.cs" />
+        <Compile Include="Operations\Quit.cs" />
         <Compile Include="Operations\Set.cs" />
         <Compile Include="AsyncServer.cs" />
         <Compile Include="DataParser.cs" />
