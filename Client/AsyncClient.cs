@@ -9,34 +9,36 @@ namespace Client
   public abstract class AsyncClient
   {
     private static readonly Regex SpacesRegex = new Regex(@"\s+");
-    private readonly TcpClient client;
+
+    private readonly TcpClient _client;
+    private readonly Thread _listenThread;
 
     protected AsyncClient(string ipAddress, int port)
     {
-      client = new TcpClient(ipAddress, port);
+      _client = new TcpClient(ipAddress, port);
+      _listenThread = new Thread(ListenServer);
     }
 
     public void Start()
     {
-      var listenThread = new Thread(ListenServer);
-      listenThread.Start();
+      _listenThread.Start();
       Running = true;
     }
 
     public void Stop()
     {
       Running = false;
-      client.Close();
+      _client.Close();
     }
 
     public void Write(string data)
     {
       SpacesRegex.Replace(data, data);
-      
+
       var bytes = Encoding.ASCII.GetBytes(data);
-      var stream = client.GetStream();
+      var stream = _client.GetStream();
       stream.Write(bytes, 0, bytes.Length);
-      
+
       OnDataWritten(data);
     }
 
@@ -45,12 +47,12 @@ namespace Client
       OnStartListening();
 
       Running = true;
-      
+
       try
       {
-        while (client.Connected)
+        while (_client.Connected)
         {
-          var stream = client.GetStream();
+          var stream = _client.GetStream();
           var response = new byte[255];
           Array.Resize(ref response, stream.Read(response, 0, response.Length));
           var data = Encoding.Default.GetString(response);

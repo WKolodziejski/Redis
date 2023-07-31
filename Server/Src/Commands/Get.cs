@@ -1,6 +1,6 @@
-﻿namespace Server.Operations
+﻿namespace Server.Commands
 {
-  public class Get : Operation
+  public class Get : Command
   {
     public readonly string Key;
 

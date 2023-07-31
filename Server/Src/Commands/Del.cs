@@ -1,6 +1,6 @@
-﻿namespace Server.Operations
+﻿namespace Server.Commands
 {
-  public class Del : Operation
+  public class Del : Command
   {
     public readonly string[] Keys;
 

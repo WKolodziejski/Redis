@@ -12,34 +12,35 @@ namespace Server
   {
     private static readonly Regex SpacesRegex = new Regex(@"\s+");
     
-    private readonly TcpListener listener;
-    private readonly Thread connectionsThread;
-    private readonly Dictionary<string, TcpClient> clients;
+    private readonly TcpListener _listener;
+    private readonly Thread _connectionsThread;
+    private readonly Dictionary<string, TcpClient> _clients;
 
     protected AsyncServer(string ipAddress, int port)
     {
-      listener = new TcpListener(IPAddress.Parse(ipAddress), port);
-      clients = new Dictionary<string, TcpClient>();
-      connectionsThread = new Thread(ListenConnections);
+      _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
+      _clients = new Dictionary<string, TcpClient>();
+      _connectionsThread = new Thread(ListenConnections);
     }
 
     public void Start()
     {
-      listener.Start();
-      connectionsThread.Start();
+      _listener.Start();
+      _connectionsThread.Start();
+      Running = true;
     }
 
     public void Stop()
     {
-      connectionsThread.Abort();
-      listener.Stop();
+      Running = false;
+      _listener.Stop();
     }
 
     protected void Write(string id, string data)
     {
-      lock (clients)
+      lock (_clients)
       {
-        var client = clients[id];
+        var client = _clients[id];
         var stream = client.GetStream();
         var bytes = Encoding.ASCII.GetBytes(data ?? string.Empty);
         stream.Write(bytes, 0, bytes.Length);
@@ -48,11 +49,11 @@ namespace Server
 
     protected void Disconnect(string id)
     {
-      lock (clients)
+      lock (_clients)
       {
-        var client = clients[id];
+        var client = _clients[id];
         client.Close();
-        clients.Remove(id);
+        _clients.Remove(id);
         OnClientDisconnected(id);
       }
     }
@@ -60,17 +61,19 @@ namespace Server
     private void ListenConnections()
     {
       OnStartListening();
+      
+      Running = true;
 
       try
       {
-        while (true)
+        while (_listener.Server.IsBound)
         {
           var id = Guid.NewGuid().ToString();
-          var client = listener.AcceptTcpClient();
+          var client = _listener.AcceptTcpClient();
 
-          lock (clients)
+          lock (_clients)
           {
-            clients.Add(id, client);
+            _clients.Add(id, client);
           }
 
           var clientThread = new Thread(() => ListenClient(id, client));
@@ -82,8 +85,7 @@ namespace Server
         OnError(e);
       }
 
-      listener.Stop();
-
+      Stop();
       OnStopListening();
     }
 
@@ -113,6 +115,8 @@ namespace Server
 
       client.Close();
     }
+    
+    public bool Running { get; private set; }
 
     protected abstract void OnStartListening();
     protected abstract void OnStopListening();

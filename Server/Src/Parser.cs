@@ -1,62 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Server.Operations;
+using Server.Commands;
 
 namespace Server
 {
-  public class DataParser
+  public static class Parser
   {
-    public delegate void OnDataParsed(string id, Operation o);
-
-    private readonly string id;
-    private readonly OnDataParsed onDataParsed;
-
-    public DataParser(string id, OnDataParsed onDataParsed)
-    {
-      this.id = id;
-      this.onDataParsed = onDataParsed;
-    }
-
-    public void Parse(string data)
+    public static Command Parse(string data)
     {
       var tokens = data.Split(' ');
 
       if (tokens.Length == 0)
-        return;
+        return new Error("empty");
 
-      var o = tokens[0].ToUpper() switch
+      return tokens[0].ToUpper() switch
       {
         "GET" => Get(tokens),
         "SET" => Set(tokens),
         "DEL" => Del(tokens),
         "QUIT" => Quit(tokens),
-        _ => new Error($"-ERR unknown command '{tokens[0]}'")
+        _ => new Error($"unknown command '{tokens[0]}'")
       };
-
-      onDataParsed(id, o);
     }
 
-    private static Operation Get(IList<string> args)
+    private static Command Get(IList<string> args)
     {
       if (args.Count != 2)
-        return new Error("-ERR wrong number of arguments");
+        return new Error("wrong number of arguments");
 
       return new Get(args[1]);
     }
 
-    private static Operation Del(IList<string> args)
+    private static Command Del(IList<string> args)
     {
       if (args.Count < 2)
-        return new Error("-ERR wrong number of arguments");
+        return new Error("wrong number of arguments");
 
       return new Del(args.Skip(1).ToArray());
     }
 
-    private static Operation Set(IList<string> args)
+    private static Command Set(IList<string> args)
     {
       if (args.Count < 3 || args.Count > 6)
-        return new Error("-ERR wrong number of arguments");
+        return new Error("wrong number of arguments");
 
       if (args.Count == 3)
       {
@@ -96,13 +83,13 @@ namespace Server
         }
       }
 
-      return new Error("-ERR wrong arguments");
+      return new Error("wrong arguments");
     }
 
-    private static Operation Quit(IList<string> args)
+    private static Command Quit(IList<string> args)
     {
       if (args.Count != 1)
-        return new Error("-ERR wrong number of arguments");
+        return new Error("wrong number of arguments");
 
       return new Quit();
     }
