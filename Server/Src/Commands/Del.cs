@@ -4,7 +4,7 @@
   {
     public readonly string[] Keys;
 
-    public Del(string[] keys)
+    public Del(params string[] keys)
     {
       Keys = keys;
     }

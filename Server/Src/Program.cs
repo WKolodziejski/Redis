@@ -2,7 +2,7 @@
 
 namespace Server
 {
-  internal class Program
+  internal abstract class Program
   {
     private const int Port = 6379;
     private const string ServerIp = "127.0.0.1";
