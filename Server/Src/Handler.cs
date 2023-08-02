@@ -31,7 +31,11 @@ namespace Server
 
         if (exists)
         {
-          exists = !IsExpired(o.Key, data, table);
+          if (data.Expiration <= DateTime.Now)
+          {
+            table.Remove(o.Key);
+            exists = false;
+          }
         }
 
         switch (exists)
@@ -76,16 +80,18 @@ namespace Server
           return new Action[] { new Write(id, "-1") };
         }
 
-        if (IsExpired(o.Key, data, table))
+        if (data.Expiration > DateTime.Now)
         {
-          return new Action[] { new Write(id, "-1") };
+          return new Action[]
+          {
+            new Write(id, $"${data.Value.Length}"),
+            new Write(id, data.Value),
+          };
         }
 
-        return new Action[]
-        {
-          new Write(id, $"${data.Value.Length}"),
-          new Write(id, data.Value),
-        };
+        table.Remove(o.Key);
+
+        return new Action[] { new Write(id, "-1") };
       }
     }
 
@@ -117,19 +123,6 @@ namespace Server
         new Write(id, "+OK"),
         new Disconnect(id),
       };
-    }
-
-    private static bool IsExpired(string key, Data data, Dictionary<string, Data> table)
-    {
-      if (data.Expiration > DateTime.Now)
-        return false;
-
-      lock (table)
-      {
-        table.Remove(key);
-      }
-
-      return true;
     }
   }
 }

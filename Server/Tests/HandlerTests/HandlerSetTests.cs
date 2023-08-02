@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NUnit.Framework;
 using Server.Commands;
 
@@ -68,6 +69,39 @@ namespace Server.Tests.HandlerTests
     }
     
     [Test]
+    public void SetXxShouldReplaceTimeout()
+    {
+      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
+      var set = new Set("KEY", "20", "XX");
+      var actionsSet = Handler.Handle("id", set, table);
+
+      HandlerUtils.ExpectsWrite(actionsSet.ToList(), "+OK");
+
+      var get = new Get("KEY");
+      var actionsGet = Handler.Handle("id", get, table);
+
+      HandlerUtils.ExpectsWrite(actionsGet.ToList(), "$2", "20");
+    }
+    
+    [Test]
+    public void SetXxShouldNotReplaceTimeout()
+    {
+      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
+      var set = new Set("KEY", "20", "XX");
+      
+      Thread.Sleep(1000);
+      
+      var actionsSet = Handler.Handle("id", set, table);
+
+      HandlerUtils.ExpectsWrite(actionsSet.ToList(), "-1");
+
+      var get = new Get("KEY");
+      var actionsGet = Handler.Handle("id", get, table);
+
+      HandlerUtils.ExpectsWrite(actionsGet.ToList(), "-1");
+    }
+    
+    [Test]
     public void SetNxShouldInsert()
     {
       var table = new Dictionary<string, Data>();
@@ -86,6 +120,39 @@ namespace Server.Tests.HandlerTests
     public void SetNxShouldNotInsert()
     {
       var table = new Dictionary<string, Data> { { "KEY", new Data("10") } };
+      var set = new Set("KEY", "20", "NX");
+      var actionsSet = Handler.Handle("id", set, table);
+
+      HandlerUtils.ExpectsWrite(actionsSet.ToList(), "-1");
+
+      var get = new Get("KEY");
+      var actionsGet = Handler.Handle("id", get, table);
+
+      HandlerUtils.ExpectsWrite(actionsGet.ToList(), "$2", "10");
+    }
+    
+    [Test]
+    public void SetNxShouldInsertTimeout()
+    {
+      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
+      var set = new Set("KEY", "10", "NX");
+      
+      Thread.Sleep(1000);
+      
+      var actionsSet = Handler.Handle("id", set, table);
+
+      HandlerUtils.ExpectsWrite(actionsSet.ToList(), "+OK");
+
+      var get = new Get("KEY");
+      var actionsGet = Handler.Handle("id", get, table);
+
+      HandlerUtils.ExpectsWrite(actionsGet.ToList(), "$2", "10");
+    }
+    
+    [Test]
+    public void SetNxShouldNotInsertTimeout()
+    {
+      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
       var set = new Set("KEY", "20", "NX");
       var actionsSet = Handler.Handle("id", set, table);
 
