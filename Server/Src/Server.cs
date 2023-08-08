@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Server.Actions;
 
 namespace Server
 {
   public class Server : AsyncServer
   {
     public Dictionary<string, Data> Table { get; }
-    
+
     public Server(string ipAddress, int port) : base(ipAddress, port)
     {
       Table = new Dictionary<string, Data>();
@@ -14,21 +16,21 @@ namespace Server
 
     protected override void OnDataReceived(string id, string data)
     {
-      Console.WriteLine($"{data}");
+      Console.WriteLine($"{id}: {data}");
+
       var actions = Handler.Handle(id, Parser.Parse(data), Table);
 
-      foreach (var action in actions)
-      {
-        switch (action)
-        {
-          case Actions.Write a:
-            Write(a.Id, a.Message);
-            break;
+      var responses = (from Write a in actions.OfType<Write>() select a.Message).ToList();
 
-          case Actions.Disconnect a:
-            Disconnect(a.Id);
-            break;
-        }
+      if (responses.Count > 0)
+      {
+        var response = string.Join("\n", responses);
+        Send(id, response);
+      }
+
+      foreach (var a in actions.OfType<Disconnect>())
+      {
+        Disconnect(a.Id);
       }
     }
 

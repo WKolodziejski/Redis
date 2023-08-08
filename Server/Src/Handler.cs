@@ -8,17 +8,18 @@ namespace Server
 {
   public abstract class Handler
   {
-    public static IEnumerable<Action> Handle(string id, Command command, Dictionary<string, Data> table)
+    public static List<Action> Handle(string id, Command command, Dictionary<string, Data> table)
     {
-      return command switch
+      return new List<Action>(command switch
       {
         Get o => Get(id, o, table),
         Set o => Set(id, o, table),
         Del o => Del(id, o, table),
         Quit _ => Quit(id),
+        Ping _ => Ping(id),
         Error o => new Action[] { new Write(id, o.Message) },
-        _ => new Action[0]
-      };
+        _ => Array.Empty<Action>()
+      });
     }
 
     private static Action[] Set(string id, Set o, Dictionary<string, Data> table)
@@ -122,6 +123,14 @@ namespace Server
       {
         new Write(id, "+OK"),
         new Disconnect(id),
+      };
+    }
+    
+    private static Action[] Ping(string id)
+    {
+      return new Action[]
+      {
+        new Write(id, "+OK")
       };
     }
   }

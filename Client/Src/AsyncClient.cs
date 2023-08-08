@@ -6,17 +6,22 @@ using System.Threading;
 
 namespace Client
 {
-  public abstract class AsyncClient
+  public abstract class AsyncClient : IDisposable
   {
     private static readonly Regex SpacesRegex = new Regex(@"\s+");
 
     private readonly TcpClient _client;
     private readonly Thread _listenThread;
+    private readonly Semaphore _semaphore;
+
+    private string _lastResponse;
+    private bool _awaitingResponse;
 
     protected AsyncClient(string ipAddress, int port)
     {
       _client = new TcpClient(ipAddress, port);
       _listenThread = new Thread(ListenServer);
+      _semaphore = new Semaphore(0, 1);
     }
 
     public void Start()
@@ -31,15 +36,31 @@ namespace Client
       _client.Close();
     }
 
-    public void Write(string data)
+    public string Send(string data)
     {
       SpacesRegex.Replace(data, data);
 
+      if (data.Length == 0)
+      {
+        return null;
+      }
+      
+      _awaitingResponse = true;
+      
       var bytes = Encoding.ASCII.GetBytes(data);
       var stream = _client.GetStream();
       stream.Write(bytes, 0, bytes.Length);
+      
+      if (_semaphore.WaitOne())
+      {
+        _awaitingResponse = false;
+      }
+      
+      var response = _lastResponse;
 
-      OnDataWritten(data);
+      _lastResponse = null;
+
+      return response;
     }
 
     private void ListenServer()
@@ -56,6 +77,13 @@ namespace Client
           var response = new byte[255];
           Array.Resize(ref response, stream.Read(response, 0, response.Length));
           var data = Encoding.Default.GetString(response);
+
+          _lastResponse = data;
+          
+          if (_awaitingResponse)
+          {
+            _semaphore.Release();
+          }
 
           OnDataReceived(data);
         }
@@ -74,7 +102,11 @@ namespace Client
     protected abstract void OnStartListening();
     protected abstract void OnStopListening();
     protected abstract void OnDataReceived(string data);
-    protected abstract void OnDataWritten(string data);
     protected abstract void OnError(Exception e);
+
+    public void Dispose()
+    {
+      _client.Close();
+    }
   }
 }

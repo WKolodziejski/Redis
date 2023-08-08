@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Server
 {
-  public abstract class AsyncServer
+  public abstract class AsyncServer : IDisposable
   {
     private static readonly Regex SpacesRegex = new Regex(@"\s+");
     
@@ -27,16 +27,14 @@ namespace Server
     {
       _listener.Start();
       _connectionsThread.Start();
-      Running = true;
     }
 
     public void Stop()
     {
-      Running = false;
       _listener.Stop();
     }
 
-    protected void Write(string id, string data)
+    protected void Send(string id, string data)
     {
       lock (_clients)
       {
@@ -61,8 +59,6 @@ namespace Server
     private void ListenConnections()
     {
       OnStartListening();
-      
-      Running = true;
 
       try
       {
@@ -115,8 +111,6 @@ namespace Server
 
       client.Close();
     }
-    
-    public bool Running { get; private set; }
 
     protected abstract void OnStartListening();
     protected abstract void OnStopListening();
@@ -124,5 +118,10 @@ namespace Server
     protected abstract void OnClientConnected(string id);
     protected abstract void OnClientDisconnected(string id);
     protected abstract void OnError(Exception e);
+    
+    public void Dispose()
+    {
+      _listener.Stop();
+    }
   }
 }

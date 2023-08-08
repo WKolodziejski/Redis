@@ -20,6 +20,7 @@ namespace Server
         "SET" => Set(tokens),
         "DEL" => Del(tokens),
         "QUIT" => Quit(tokens),
+        "PING" => Ping(tokens),
         _ => new Error($"unknown command '{tokens[0]}'")
       };
     }
@@ -92,6 +93,14 @@ namespace Server
         return new Error("wrong number of arguments");
 
       return new Quit();
+    }
+    
+    private static Command Ping(IList<string> args)
+    {
+      if (args.Count != 1)
+        return new Error("wrong number of arguments");
+
+      return new Ping();
     }
   }
 }

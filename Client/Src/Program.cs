@@ -15,10 +15,18 @@ namespace Client
       while (client.Running)
       {
         var data = Console.ReadLine();
-        client.Write(data);
-        
-        if (data.ToUpper() == "QUIT") 
+        var resp = client.Send(data);
+
+        if (resp != null)
+        {
+          Console.WriteLine(resp);
+        }
+
+        if (data != null && data.ToUpper() == "QUIT" && resp == "+OK")
+        {
+          client.Stop();
           break;
+        }
       }
     }
   }
