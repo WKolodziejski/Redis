@@ -7,18 +7,18 @@ namespace Server
 {
   public class Server : AsyncServer
   {
-    public Dictionary<string, Data> Table { get; }
+    private readonly Dictionary<string, Data> _table;
 
     public Server(string ipAddress, int port) : base(ipAddress, port)
     {
-      Table = new Dictionary<string, Data>();
+      _table = new Dictionary<string, Data>();
     }
 
     protected override void OnDataReceived(string id, string data)
     {
       Console.WriteLine($"{id}: {data}");
 
-      var actions = Handler.Handle(id, Parser.Parse(data), Table);
+      var actions = Handler.Handle(id, Parser.Parse(data), _table);
 
       var responses = (from Write a in actions.OfType<Write>() select a.Message).ToList();
 

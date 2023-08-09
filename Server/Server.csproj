@@ -63,11 +63,10 @@
         <Compile Include="Src\Server.cs" />
         <Compile Include="Tests\HandlerTests\HandlerDelTests.cs" />
         <Compile Include="Tests\HandlerTests\HandlerUtils.cs" />
-        <Compile Include="Tests\IntegrationTest.cs" />
         <Compile Include="Tests\HandlerTests\HandlerGetTests.cs" />
         <Compile Include="Tests\HandlerTests\HandlerSetTests.cs" />
         <Compile Include="Tests\IntegrationTests\IntegrationConnectionTests.cs" />
-        <Compile Include="Tests\IntegrationTests\IntegrationGetSetTests.cs" />
+        <Compile Include="Tests\IntegrationTests\IntegrationCommandsTests.cs" />
         <Compile Include="Tests\ParserTests\ParserDelTests.cs" />
         <Compile Include="Tests\ParserTests\ParserGetTests.cs" />
         <Compile Include="Tests\ParserTests\ParserQuitTests.cs" />
