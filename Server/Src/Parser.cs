@@ -12,7 +12,7 @@ namespace Server
       var tokens = data.Split(' ');
 
       if (tokens.Length == 0)
-        return new Error("empty");
+        return new Unknown("empty");
 
       return tokens[0].ToUpper() switch
       {
@@ -21,14 +21,15 @@ namespace Server
         "DEL" => Del(tokens),
         "QUIT" => Quit(tokens),
         "PING" => Ping(tokens),
-        _ => new Error($"unknown command '{tokens[0]}'")
+        "EXISTS" => Exists(tokens),
+        _ => new Unknown($"unknown command '{tokens[0]}'")
       };
     }
 
     private static Command Get(IList<string> args)
     {
       if (args.Count != 2)
-        return new Error("wrong number of arguments");
+        return new Unknown("wrong number of arguments");
 
       return new Get(args[1]);
     }
@@ -36,7 +37,7 @@ namespace Server
     private static Command Del(IList<string> args)
     {
       if (args.Count < 2)
-        return new Error("wrong number of arguments");
+        return new Unknown("wrong number of arguments");
 
       return new Del(args.Skip(1).ToArray());
     }
@@ -44,7 +45,7 @@ namespace Server
     private static Command Set(IList<string> args)
     {
       if (args.Count < 3 || args.Count > 6)
-        return new Error("wrong number of arguments");
+        return new Unknown("wrong number of arguments");
 
       if (args.Count == 3)
       {
@@ -84,13 +85,13 @@ namespace Server
         }
       }
 
-      return new Error("wrong arguments");
+      return new Unknown("wrong arguments");
     }
 
     private static Command Quit(IList<string> args)
     {
       if (args.Count != 1)
-        return new Error("wrong number of arguments");
+        return new Unknown("wrong number of arguments");
 
       return new Quit();
     }
@@ -98,9 +99,17 @@ namespace Server
     private static Command Ping(IList<string> args)
     {
       if (args.Count != 1)
-        return new Error("wrong number of arguments");
+        return new Unknown("wrong number of arguments");
 
       return new Ping();
+    }
+
+    private static Command Exists(IList<string> args)
+    {
+      if (args.Count != 2)
+        return new Unknown("wrong number of arguments");
+
+      return new Exists(args[1]);
     }
   }
 }

@@ -9,7 +9,7 @@ namespace Server.Tests.IntegrationTests
     private const string ServerIp = "127.0.0.1";
     
     [Test]
-    public void SetAndGetAndDel()
+    public void ShouldSetGetAndDel()
     {
       using var server = new Server(ServerIp, Port);
       server.Start();
@@ -26,7 +26,7 @@ namespace Server.Tests.IntegrationTests
     }
     
     [Test]
-    public void SetAndGetAndDelTimeout()
+    public void ShouldSetGetAndTimeout()
     {
       using var server = new Server(ServerIp, Port);
       server.Start();
@@ -43,6 +43,42 @@ namespace Server.Tests.IntegrationTests
       Thread.Sleep(2000);
 
       Assert.AreEqual("-1", client.Send("GET KEY"));
+    }
+    
+    [Test]
+    public void ShouldSetAndExists()
+    {
+      using var server = new Server(ServerIp, Port);
+      server.Start();
+      
+      Thread.Sleep(100);
+      
+      using var client = new Client.Client(ServerIp, Port);
+      client.Start();
+      Thread.Sleep(100);
+
+      Assert.AreEqual("+OK", client.Send("SET KEY ABC PX 2000"));
+      Assert.AreEqual("1", client.Send("EXISTS KEY"));
+    }
+        
+    [Test]
+    public void ShouldSetAndExistsTimeout()
+    {
+      using var server = new Server(ServerIp, Port);
+      server.Start();
+      
+      Thread.Sleep(100);
+      
+      using var client = new Client.Client(ServerIp, Port);
+      client.Start();
+      Thread.Sleep(100);
+
+      Assert.AreEqual("+OK", client.Send("SET KEY ABC PX 2000"));
+      Assert.AreEqual("1", client.Send("EXISTS KEY"));
+      
+      Thread.Sleep(2000);
+
+      Assert.AreEqual("-1", client.Send("EXISTS KEY"));
     }
   }
 }

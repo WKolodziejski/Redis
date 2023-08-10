@@ -15,10 +15,11 @@ namespace Server
         Get o => Get(id, o, table),
         Set o => Set(id, o, table),
         Del o => Del(id, o, table),
+        Exists o => Exists(id, o, table),
         Quit _ => Quit(id),
         Ping _ => Ping(id),
-        Error o => new Action[] { new Write(id, o.Message) },
-        _ => Array.Empty<Action>()
+        Unknown o => new Action[] { new Write(id, o.Message) },
+        _ => new Action[] { new Error(id, command) }
       });
     }
 
@@ -26,18 +27,10 @@ namespace Server
     {
       lock (table)
       {
-        var exists = table.TryGetValue(o.Key, out var data);
         var nx = o.Replacement == "NX"; // Only set the key if it does not already exist.
         var xx = o.Replacement == "XX"; // Only set the key if it already exist.
 
-        if (exists)
-        {
-          if (data.Expiration <= DateTime.Now)
-          {
-            table.Remove(o.Key);
-            exists = false;
-          }
-        }
+        var exists = TryGetValue(o.Key, out _, table);
 
         switch (exists)
         {
@@ -74,25 +67,13 @@ namespace Server
     {
       lock (table)
       {
-        var exists = table.TryGetValue(o.Key, out var data);
-
-        if (!exists)
-        {
-          return new Action[] { new Write(id, "-1") };
-        }
-
-        if (data.Expiration > DateTime.Now)
-        {
-          return new Action[]
+        return TryGetValue(o.Key, out var data, table)
+          ? new Action[]
           {
             new Write(id, $"${data.Value.Length}"),
             new Write(id, data.Value),
-          };
-        }
-
-        table.Remove(o.Key);
-
-        return new Action[] { new Write(id, "-1") };
+          }
+          : new Action[] { new Write(id, "-1") };
       }
     }
 
@@ -117,6 +98,16 @@ namespace Server
       }
     }
 
+    private static Action[] Exists(string id, Exists o, Dictionary<string, Data> table)
+    {
+      lock (table)
+      {
+        return TryGetValue(o.Key, out _, table)
+          ? new Action[] { new Write(id, "1") }
+          : new Action[] { new Write(id, "-1") };
+      }
+    }
+
     private static Action[] Quit(string id)
     {
       return new Action[]
@@ -125,13 +116,38 @@ namespace Server
         new Disconnect(id),
       };
     }
-    
+
     private static Action[] Ping(string id)
     {
       return new Action[]
       {
-        new Write(id, "+OK")
+        new Write(id, "+PONG")
       };
+    }
+
+    private static bool TryGetValue(string key, out Data value, Dictionary<string, Data> table)
+    {
+      lock (table)
+      {
+        var exists = table.TryGetValue(key, out var data);
+
+        if (!exists)
+        {
+          value = null;
+          return false;
+        }
+
+        if (data.Expiration > DateTime.Now)
+        {
+          value = data;
+          return true;
+        }
+
+        table.Remove(key);
+
+        value = null;
+        return false;
+      }
     }
   }
 }

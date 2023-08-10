@@ -1,10 +1,10 @@
 ﻿namespace Server.Commands
 {
-  public class Error : Command
+  public class Unknown : Command
   {
     private readonly string _message;
 
-    public Error(string message)
+    public Unknown(string message)
     {
       _message = message;
     }

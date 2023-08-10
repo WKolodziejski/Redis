@@ -21,7 +21,7 @@ namespace Server.Tests.IntegrationTests
       client.Start();
       Thread.Sleep(100);
 
-      Assert.AreEqual("+OK", client.Send("PING"));
+      Assert.AreEqual("+PONG", client.Send("PING"));
       Assert.AreEqual("+OK", client.Send("QUIT"));
     }
     
@@ -41,8 +41,8 @@ namespace Server.Tests.IntegrationTests
       client2.Start();
       Thread.Sleep(100);
 
-      Assert.AreEqual("+OK", client1.Send("PING"));
-      Assert.AreEqual("+OK", client2.Send("PING"));
+      Assert.AreEqual("+PONG", client1.Send("PING"));
+      Assert.AreEqual("+PONG", client2.Send("PING"));
       Assert.AreEqual("+OK", client1.Send("QUIT"));
       Assert.AreEqual("+OK", client2.Send("QUIT"));
     }

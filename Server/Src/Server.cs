@@ -32,6 +32,11 @@ namespace Server
       {
         Disconnect(a.Id);
       }
+
+      foreach (var a in actions.OfType<Error>())
+      {
+        Send(id, $"-ERR {a.GetType()} notImplemented");
+      }
     }
 
     protected override void OnStartListening()

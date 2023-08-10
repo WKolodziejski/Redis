@@ -28,7 +28,7 @@ namespace Server.Tests.ParserTests
 
       var cmd = Parser.Parse(data);
       
-      Assert.IsInstanceOf<Error>(cmd);
+      Assert.IsInstanceOf<Unknown>(cmd);
     }
     
     [Test]

@@ -3,26 +3,26 @@ using Server.Commands;
 
 namespace Server.Tests.ParserTests
 {
-  public class ParserGetTests
+  public class ParserExistsTests
   {
     [Test]
-    public void ShouldCreateGet()
+    public void ShouldCreateExists()
     {
-      const string data = "GET A";
+      const string data = "EXISTS A";
 
       var cmd = Parser.Parse(data);
       
-      Assert.IsInstanceOf<Get>(cmd);
+      Assert.IsInstanceOf<Exists>(cmd);
 
-      var get = cmd as Get;
+      var exists = cmd as Exists;
       
-      Assert.AreEqual("A", get!.Key);
+      Assert.AreEqual("A", exists!.Key);
     }
     
     [Test]
-    public void ShouldNotCreateGetFewArgs()
+    public void ShouldNotCreateExistsFewArgs()
     {
-      const string data = "GET";
+      const string data = "EXISTS";
 
       var cmd = Parser.Parse(data);
       
@@ -30,9 +30,9 @@ namespace Server.Tests.ParserTests
     }
     
     [Test]
-    public void ShouldNotCreateGetExtraArgs()
+    public void ShouldNotCreateExistsExtraArgs()
     {
-      const string data = "GET A XX";
+      const string data = "EXISTS A XX";
 
       var cmd = Parser.Parse(data);
       
