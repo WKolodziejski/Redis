@@ -1,13 +1,13 @@
 ﻿namespace Server.Commands
 {
   /*
-   * Gets the value of a key.
+   * Removes the expiration from the key.
    */
-  public class Get : Command
+  public class Persist : Command
   {
     public readonly string Key;
 
-    public Get(string key)
+    public Persist(string key)
     {
       Key = key;
     }

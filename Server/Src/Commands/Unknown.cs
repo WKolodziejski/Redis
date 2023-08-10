@@ -1,5 +1,8 @@
 ﻿namespace Server.Commands
 {
+  /*
+   * Class used when a command is not known by the server.
+   */
   public class Unknown : Command
   {
     private readonly string _message;

@@ -51,6 +51,8 @@
         <Compile Include="Src\Actions\Write.cs" />
         <Compile Include="Src\AsyncServer.cs" />
         <Compile Include="Src\Commands\Exists.cs" />
+        <Compile Include="Src\Commands\Expire.cs" />
+        <Compile Include="Src\Commands\Persist.cs" />
         <Compile Include="Src\Commands\Ping.cs" />
         <Compile Include="Src\Data.cs" />
         <Compile Include="Src\Handler.cs" />
@@ -65,6 +67,7 @@
         <Compile Include="Src\Server.cs" />
         <Compile Include="Tests\HandlerTests\HandlerDelTests.cs" />
         <Compile Include="Tests\HandlerTests\HandlerExistsTests.cs" />
+        <Compile Include="Tests\HandlerTests\HandlerPersisTests.cs" />
         <Compile Include="Tests\HandlerTests\HandlerUtils.cs" />
         <Compile Include="Tests\HandlerTests\HandlerGetTests.cs" />
         <Compile Include="Tests\HandlerTests\HandlerSetTests.cs" />
@@ -73,6 +76,7 @@
         <Compile Include="Tests\ParserTests\ParserDelTests.cs" />
         <Compile Include="Tests\ParserTests\ParserExistsTests.cs" />
         <Compile Include="Tests\ParserTests\ParserGetTests.cs" />
+        <Compile Include="Tests\ParserTests\ParserPersistTests.cs" />
         <Compile Include="Tests\ParserTests\ParserQuitTests.cs" />
         <Compile Include="Tests\ParserTests\ParserSetTests.cs" />
     </ItemGroup>

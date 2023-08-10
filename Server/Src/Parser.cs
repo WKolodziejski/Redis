@@ -22,6 +22,7 @@ namespace Server
         "QUIT" => Quit(tokens),
         "PING" => Ping(tokens),
         "EXISTS" => Exists(tokens),
+        "PERSIST" => Persist(tokens),
         _ => new Unknown($"unknown command '{tokens[0]}'")
       };
     }
@@ -110,6 +111,14 @@ namespace Server
         return new Unknown("wrong number of arguments");
 
       return new Exists(args[1]);
+    }
+
+    private static Command Persist(IList<string> args)
+    {
+      if (args.Count != 2)
+        return new Unknown("wrong number of arguments");
+
+      return new Persist(args[1]);
     }
   }
 }

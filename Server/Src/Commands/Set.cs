@@ -1,5 +1,8 @@
 ﻿namespace Server.Commands
 {
+  /*
+   * This command sets the value at the specified key.
+   */
   public class Set : Command
   {
     public readonly string Key;

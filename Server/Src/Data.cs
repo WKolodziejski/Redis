@@ -5,22 +5,23 @@ namespace Server
   public class Data
   {
     public readonly string Value;
-    private readonly bool _expires;
     private readonly DateTime _expiration;
+
+    public bool Expires;
 
     public Data(string value)
     {
       Value = value;
-      _expires = false;
+      Expires = false;
     }
     
     public Data(string value, long duration)
     {
       Value = value;
-      _expires = true;
+      Expires = true;
       _expiration = DateTime.Now.AddMilliseconds(duration);
     }
     
-    public DateTime Expiration => _expires ? _expiration : DateTime.MaxValue;
+    public DateTime Expiration => Expires ? _expiration : DateTime.MaxValue;
   }
 }

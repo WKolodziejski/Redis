@@ -16,6 +16,7 @@ namespace Server
         Set o => Set(id, o, table),
         Del o => Del(id, o, table),
         Exists o => Exists(id, o, table),
+        Persist o => Persist(id, o, table),
         Quit _ => Quit(id),
         Ping _ => Ping(id),
         Unknown o => new Action[] { new Write(id, o.Message) },
@@ -105,6 +106,21 @@ namespace Server
         return TryGetValue(o.Key, out _, table)
           ? new Action[] { new Write(id, "1") }
           : new Action[] { new Write(id, "-1") };
+      }
+    }
+    
+    private static Action[] Persist(string id, Persist o, Dictionary<string, Data> table)
+    {
+      lock (table)
+      {
+        if (!TryGetValue(o.Key, out var data, table) || !data.Expires)
+        {
+          return new Action[] { new Write(id, ":0") };
+        }
+
+        data.Expires = false;
+            
+        return new Action[] { new Write(id, ":1") };
       }
     }
 
