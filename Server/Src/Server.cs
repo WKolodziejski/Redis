@@ -61,7 +61,7 @@ namespace Server
 
     protected override void OnError(Exception e)
     {
-      Console.Error.WriteLine(e);
+      // Console.Error.WriteLine(e);
     }
   }
 }

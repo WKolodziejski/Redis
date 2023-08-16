@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Server
 {
@@ -7,21 +8,38 @@ namespace Server
     private const int Port = 6379;
     private const string ServerIp = "127.0.0.1";
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
+      var tcs = new TaskCompletionSource<bool>();
+      var sigintReceived = false;
+      
       var server = new Server(ServerIp, Port);
       server.Start();
 
-      while (true)
+      Console.CancelKeyPress += (_, ea) =>
       {
-        var data = Console.ReadLine();
+        Console.WriteLine("Initiating graceful shutdown...");
+        
+        server.Stop();
+        ea.Cancel = true;
+        tcs.SetResult(true);
+        
+        sigintReceived = true;
+      };
+      
+      AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) =>
+      {
+        if (sigintReceived) return;
+        
+        server.Stop();
+        tcs.SetResult(true);
+      };
+      
+      await tcs.Task;
 
-        if (data.ToUpper().Equals("QUIT"))
-        {
-          server.Stop();
-          break;
-        }
-      }
+      await Task.Delay(1000);
+
+      Console.WriteLine("Finishing graceful shutdown...");
     }
   }
 }

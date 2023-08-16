@@ -90,10 +90,10 @@ namespace Client
       }
       catch (Exception e)
       {
+        Stop();
         OnError(e);
       }
-
-      Stop();
+      
       OnStopListening();
     }
 

@@ -14,12 +14,12 @@ namespace Server
     
     private readonly TcpListener _listener;
     private readonly Thread _connectionsThread;
-    private readonly Dictionary<string, TcpClient> _clients;
+    private readonly Dictionary<string, (TcpClient, Thread)> _clients;
 
     protected AsyncServer(string ipAddress, int port)
     {
       _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
-      _clients = new Dictionary<string, TcpClient>();
+      _clients = new Dictionary<string, (TcpClient, Thread)>();
       _connectionsThread = new Thread(ListenConnections);
     }
 
@@ -32,6 +32,15 @@ namespace Server
     public void Stop()
     {
       _listener.Stop();
+
+      lock (_clients)
+      {
+        foreach (var client in _clients.Values)
+        {
+          client.Item1.Close();
+          client.Item2.Abort();
+        }
+      }
     }
 
     protected void Send(string id, string data)
@@ -39,7 +48,7 @@ namespace Server
       lock (_clients)
       {
         var client = _clients[id];
-        var stream = client.GetStream();
+        var stream = client.Item1.GetStream();
         var bytes = Encoding.ASCII.GetBytes(data ?? string.Empty);
         stream.Write(bytes, 0, bytes.Length);
       }
@@ -50,7 +59,8 @@ namespace Server
       lock (_clients)
       {
         var client = _clients[id];
-        client.Close();
+        client.Item1.Close();
+        client.Item2.Abort();
         _clients.Remove(id);
         OnClientDisconnected(id);
       }
@@ -66,22 +76,22 @@ namespace Server
         {
           var id = Guid.NewGuid().ToString();
           var client = _listener.AcceptTcpClient();
+          var thread = new Thread(() => ListenClient(id, client));
 
           lock (_clients)
           {
-            _clients.Add(id, client);
+            _clients.Add(id, (client, thread));
           }
-
-          var clientThread = new Thread(() => ListenClient(id, client));
-          clientThread.Start();
+          
+          thread.Start();
         }
       }
       catch (Exception e)
       {
+        Stop();
         OnError(e);
       }
 
-      Stop();
       OnStopListening();
     }
 
