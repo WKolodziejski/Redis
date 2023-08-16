@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 using Server.Commands;
+using Server.Data;
 
 namespace Server.Tests.HandlerTests
 {
@@ -11,7 +12,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void GetShouldNotReturn()
     {
-      var table = new Dictionary<string, Data>();
+      var table = new Dictionary<string, Entry>();
       var get = new Get("KEY");
       var actions = Handler.Handle("id", get, table);
 
@@ -21,7 +22,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void GetShouldReturn()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10") } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry("10") } };
       var get = new Get("KEY");
       var actions = Handler.Handle("id", get, table);
 
@@ -31,7 +32,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void GetShouldTimeout()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry("10", 1000) } };
       var get = new Get("KEY");
       var actionsBefore = Handler.Handle("id", get, table);
 

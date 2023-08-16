@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Server.Commands;
+using Server.Data;
 
 namespace Server.Tests.HandlerTests
 {
@@ -10,7 +11,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void ShouldDeleteZero()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10") } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry(10, typeof(int)) } };
       var del = new Del("KEY_INVALID");
       var actions = Handler.Handle("id", del, table);
 
@@ -20,7 +21,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void ShouldDeleteOne()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10") } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry(10, typeof(int)) } };
       var del = new Del("KEY");
       var actions = Handler.Handle("id", del, table);
 
@@ -30,11 +31,11 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void ShouldDeleteTwo()
     {
-      var table = new Dictionary<string, Data>
+      var table = new Dictionary<string, Entry>
       {
-        { "KEY1", new Data("10") },
-        { "KEY2", new Data("20") },
-        { "KEY3", new Data("30") }
+        { "KEY1", new Entry(10, typeof(int)) },
+        { "KEY2", new Entry(20, typeof(int)) },
+        { "KEY3", new Entry(30, typeof(int)) }
       };
       var del = new Del("KEY1", "KEY3");
       var actions = Handler.Handle("id", del, table);

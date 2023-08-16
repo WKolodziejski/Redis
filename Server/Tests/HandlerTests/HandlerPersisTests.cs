@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 using Server.Commands;
+using Server.Data;
 
 namespace Server.Tests.HandlerTests
 {
@@ -11,7 +12,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void PersistShouldNotRemoveTimeout()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10") } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry("10") } };
 
       var actionsBefore = Handler.Handle("id",  new Persist("KEY"), table);
 
@@ -21,7 +22,7 @@ namespace Server.Tests.HandlerTests
     [Test]
     public void PersistShouldRemoveTimeout()
     {
-      var table = new Dictionary<string, Data> { { "KEY", new Data("10", 1000) } };
+      var table = new Dictionary<string, Entry> { { "KEY", new Entry("10", 1000) } };
 
       var actionsBefore = Handler.Handle("id",  new Persist("KEY"), table);
 

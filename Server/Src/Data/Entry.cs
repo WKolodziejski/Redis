@@ -1,21 +1,21 @@
 ﻿using System;
 
-namespace Server
+namespace Server.Data
 {
-  public class Data
+  public class Entry<T>
   {
-    public readonly string Value;
+    public readonly T Value;
     private readonly DateTime _expiration;
 
     public bool Expires;
 
-    public Data(string value)
+    public Entry(T value)
     {
       Value = value;
       Expires = false;
     }
     
-    public Data(string value, long duration)
+    public Entry(T value, long duration)
     {
       Value = value;
       Expires = true;
@@ -23,5 +23,7 @@ namespace Server
     }
     
     public DateTime Expiration => Expires ? _expiration : DateTime.MaxValue;
+
+    public int Length => Type == typeof(string) ? ((string)Value).Length : 1;
   }
 }

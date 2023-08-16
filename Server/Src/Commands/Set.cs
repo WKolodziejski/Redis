@@ -1,4 +1,6 @@
-﻿namespace Server.Commands
+﻿using Server.Data;
+
+namespace Server.Commands
 {
   /*
    * This command sets the value at the specified key.

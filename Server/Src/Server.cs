@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using Server.Actions;
+using Server.Data;
 
 namespace Server
 {
   public class Server : AsyncServer
   {
-    private readonly Dictionary<string, Data> _table;
+    private readonly Dictionary<string, Entry<object>> _table;
 
     public Server(string ipAddress, int port) : base(ipAddress, port)
     {
-      _table = new Dictionary<string, Data>();
+      _table = new Dictionary<string, Entry<object>>();
     }
 
     protected override void OnDataReceived(string id, string data)

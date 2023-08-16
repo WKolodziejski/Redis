@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using Server.Actions;
 using Server.Commands;
+using Server.Data;
 using Action = Server.Actions.Action;
 
 namespace Server
 {
   public abstract class Handler
   {
-    public static List<Action> Handle(string id, Command command, Dictionary<string, Data> table)
+    public static List<Action> Handle(string id, Command command, Dictionary<string, Entry<object>> table)
     {
       return new List<Action>(command switch
       {
@@ -24,7 +25,7 @@ namespace Server
       });
     }
 
-    private static Action[] Set(string id, Set o, Dictionary<string, Data> table)
+    private static Action[] Set(string id, Set o, Dictionary<string, Entry<object>> table)
     {
       lock (table)
       {
@@ -48,37 +49,56 @@ namespace Server
           "PX" => o.Duration,
           _ => -1
         };
-
-        var value = duration == -1 ? new Data(o.Value) : new Data(o.Value, duration);
-
-        if (exists)
+        
+        if (int.TryParse(o.Value, out var value))
         {
-          table[o.Key] = value;
+          var entry = duration == -1 ? new Entry<int>(value) : new Entry<int>(value, duration);
+          
+          
+          if (exists)
+          {
+            table[o.Key] = entry;
+          }
+          else
+          {
+            table.Add(o.Key, entry);
+          }
         }
         else
         {
-          table.Add(o.Key, value);
+          var entry = duration == -1 ? new Entry<string>(o.Value) : new Entry<string>(o.Value, duration);
+          
+          
+          if (exists)
+          {
+            table[o.Key] = entry;
+          }
+          else
+          {
+            table.Add(o.Key, entry);
+          }
         }
+        
 
         return new Action[] { new Write(id, "+OK") };
       }
     }
 
-    private static Action[] Get(string id, Get o, Dictionary<string, Data> table)
+    private static Action[] Get(string id, Get o, Dictionary<string, Entry<object>> table)
     {
       lock (table)
       {
         return TryGetValue(o.Key, out var data, table)
           ? new Action[]
           {
-            new Write(id, $"${data.Value.Length}"),
-            new Write(id, data.Value),
+            new Write(id, $"${data.Length}"),
+            new Write(id, data.Value.ToString())
           }
           : new Action[] { new Write(id, "-1") };
       }
     }
 
-    private static Action[] Del(string id, Del o, Dictionary<string, Data> table)
+    private static Action[] Del(string id, Del o, Dictionary<string, Entry> table)
     {
       lock (table)
       {
@@ -99,7 +119,7 @@ namespace Server
       }
     }
 
-    private static Action[] Exists(string id, Exists o, Dictionary<string, Data> table)
+    private static Action[] Exists(string id, Exists o, Dictionary<string, Entry> table)
     {
       lock (table)
       {
@@ -108,8 +128,8 @@ namespace Server
           : new Action[] { new Write(id, "-1") };
       }
     }
-    
-    private static Action[] Persist(string id, Persist o, Dictionary<string, Data> table)
+
+    private static Action[] Persist(string id, Persist o, Dictionary<string, Entry> table)
     {
       lock (table)
       {
@@ -119,7 +139,7 @@ namespace Server
         }
 
         data.Expires = false;
-            
+
         return new Action[] { new Write(id, ":1") };
       }
     }
@@ -141,7 +161,7 @@ namespace Server
       };
     }
 
-    private static bool TryGetValue(string key, out Data value, Dictionary<string, Data> table)
+    private static bool TryGetValue(string key, out Entry<object> value, Dictionary<string, Entry<object>> table)
     {
       lock (table)
       {

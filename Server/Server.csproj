@@ -54,7 +54,7 @@
         <Compile Include="Src\Commands\Expire.cs" />
         <Compile Include="Src\Commands\Persist.cs" />
         <Compile Include="Src\Commands\Ping.cs" />
-        <Compile Include="Src\Data.cs" />
+        <Compile Include="Src\Data\Entry.cs" />
         <Compile Include="Src\Handler.cs" />
         <Compile Include="Src\Commands\Del.cs" />
         <Compile Include="Src\Commands\Unknown.cs" />
