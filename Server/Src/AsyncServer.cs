@@ -60,7 +60,6 @@ namespace Server
       {
         var client = _clients[id];
         client.Item1.Close();
-        client.Item2.Abort();
         _clients.Remove(id);
         OnClientDisconnected(id);
       }
@@ -119,7 +118,7 @@ namespace Server
         OnError(e);
       }
 
-      client.Close();
+      Disconnect(id);
     }
 
     protected abstract void OnStartListening();

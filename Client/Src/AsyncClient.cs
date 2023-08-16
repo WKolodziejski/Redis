@@ -32,6 +32,13 @@ namespace Client
 
     public void Stop()
     {
+      if (_client.Connected)
+      {
+        var bytes = Encoding.ASCII.GetBytes("QUIT");
+        var stream = _client.GetStream();
+        stream.Write(bytes, 0, bytes.Length);
+      }
+
       Running = false;
       _client.Close();
     }
@@ -40,7 +47,7 @@ namespace Client
     {
       SpacesRegex.Replace(data, data);
 
-      if (data.Length == 0)
+      if (string.IsNullOrEmpty(data))
       {
         return null;
       }

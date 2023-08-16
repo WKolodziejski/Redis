@@ -16,6 +16,11 @@ namespace Server
 
     protected override void OnDataReceived(string id, string data)
     {
+      if (string.IsNullOrEmpty(data))
+      {
+        return;
+      }
+      
       Console.WriteLine($"{id}: {data}");
 
       var actions = Handler.Handle(id, Parser.Parse(data), _table);
